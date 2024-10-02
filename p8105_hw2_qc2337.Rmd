@@ -16,8 +16,18 @@ Read and clean data
 
 ```{r}
  nyc_transit_df =
-   read_csv("NYC_Transit_Subway_Entrance_And_Exit_Data.csv") |> 
-   janitor::clean_names()
+   read_csv("NYC_Transit_Subway_Entrance_And_Exit_Data.csv")|> 
+   janitor::clean_names() |> 
+   select(nyc_transit_df, line, station_name, 
+          station_latitude, station_longitude, 
+          route1:route11, entrance_type, entry, vending, ada) |> 
+  mutate(
+    entry = case_match(
+      entry,
+      "Yes" ~ TRUE,
+      "No" ~ FALSE
+    )
+  )
 ```
 
 
