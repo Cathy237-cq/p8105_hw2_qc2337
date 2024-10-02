@@ -12,7 +12,7 @@ library(tidyverse)
 
 ## Problem 1
 
-Read and clean data
+ Read and clean data
 
 ```{r}
  nyc_transit_df =
@@ -23,12 +23,13 @@ Read and clean data
    mutate(
       entry = case_match(
        entry,
-        "Yes" ~ TRUE,
-        "No" ~ FALSE
+        "YES" ~ TRUE,
+        "NO" ~ FALSE
     )
   )
 ```
 
+### Short description for the dataset
 In this 'nyc_transit_df' dataset, there are 19 variables including line, station_name, station_latitude, station_longitude, route1 to route 11, entrance_type, entry, vending, and ada.
 
 Steps for data cleaning include: 
@@ -37,3 +38,83 @@ Steps for data cleaning include:
  3. Using 'mutate' to convert the entry variable from a character to a logical variable.
 
 I got the dataset with 1,868 × 19. These data are not tidy because there are 11 columns to contain 'route', it should be included in 1 column.
+
+### Answer the following questions using these data:
+
+1. How many distinct stations are there? 
+
+```{r}
+ nycstation_df = 
+   nyc_transit_df |> 
+   distinct(line, station_name)
+
+ nycstation_df
+```
+
+Create a new variable 'nycstation_df', using 'distinct' we got 465 distinct stations.
+
+2. How many stations are ADA compliant?
+
+```{r}
+ ada_station_df =
+   nyc_transit_df |> 
+     select(ada, line, station_name) |>
+     filter(ada) |> 
+     distinct(line, station_name)
+
+ ada_station_df 
+```
+
+ 84 stations are ADA compliant.
+
+3. What proportion of station entrances / exits without vending allow entrance?
+
+```{r}
+ no_vending_entry = 
+   nyc_transit_df |> 
+      filter(vending == "NO", entry == TRUE)
+
+ no_vending_station =
+   nyc_transit_df |> 
+   filter(vending == "NO")
+ 
+ 
+proportion = nrow(no_vending_entry) / nrow(no_vending_station)
+
+proportion
+
+```
+
+The proportion of station entrances / exits without vending allow entrance is 0.3770492. 
+
+
+### Reformat data
+
+Make route number and route name distinct variables
+and answer 2 questions
+
+```{r}
+ nyc_routes =
+   nyc_transit_df |> 
+   mutate(across(route1:route11, as.character)) |> 
+   pivot_longer(
+    cols = route1:route11,
+    names_to = "route_number",
+    values_to = "route_value",
+    names_prefix = "route"
+) |> 
+   filter(route_value == "A", ada == TRUE) |> 
+   distinct(line, station_name)
+  
+ nyc_routes
+```
+
+60 distinct stations serve the A train.
+Of the stations that serve the A train, 17 are ADA compliant.
+
+
+## Problem 2
+
+
+
+
