@@ -18,19 +18,22 @@ Read and clean data
  nyc_transit_df =
    read_csv("NYC_Transit_Subway_Entrance_And_Exit_Data.csv")|> 
    janitor::clean_names() |> 
-   select(nyc_transit_df, line, station_name, 
-          station_latitude, station_longitude, 
+   select(line, station_name, station_latitude, station_longitude, 
           route1:route11, entrance_type, entry, vending, ada) |> 
-  mutate(
-    entry = case_match(
-      entry,
-      "Yes" ~ TRUE,
-      "No" ~ FALSE
+   mutate(
+      entry = case_match(
+       entry,
+        "Yes" ~ TRUE,
+        "No" ~ FALSE
     )
   )
 ```
 
+In this 'nyc_transit_df' dataset, there are 19 variables including line, station_name, station_latitude, station_longitude, route1 to route 11, entrance_type, entry, vending, and ada.
 
+Steps for data cleaning include: 
+ 1. Make all variables lowcase.
+ 2. Select the variables I need.
+ 3. Using 'mutate' to convert the entry variable from a character to a logical variable.
 
-
-
+I got the dataset with 1,868 × 19. These data are not tidy because there are 11 columns to contain 'route', it should be included in 1 column.
