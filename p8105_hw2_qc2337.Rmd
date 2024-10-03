@@ -222,7 +222,7 @@ Read and clean the "bakers.csv"
    read_csv("gbb_datasets/bakers.csv", na = c("NA",".","")) |> 
    janitor::clean_names() |> 
    mutate(
-     series = as.character(series),
+     series = as.numeric(series),
      baker_age = as.character(baker_age),
   ) |> 
   separate(baker_name, into = 
@@ -238,7 +238,7 @@ Read and clean the "bakes.csv"
    read_csv("gbb_datasets/bakes.csv", na = c("NA",".","")) |> 
    janitor::clean_names() |> 
   mutate(
-    series = as.character(series),
+    series = as.numeric(series),
     episode = as.character(episode)
   )
 ```
@@ -251,7 +251,7 @@ Read and clean the "results.csv"
    read_csv("gbb_datasets/results.csv", skip = 2, na = c("NA",".","")) |> 
    janitor::clean_names() |> 
    mutate(
-     series = as.character(series),
+     series = as.numeric(series),
      episode = as.character(episode)
   )
 ```
@@ -284,6 +284,74 @@ Describe your data cleaning process, including any questions you have or choices
 
 After I import "results.csv", I realize that the column names need to change, then I went back to the original "results.csv" when it first import. I found out the first 2 rows is not organized in a way R can read, so I skip the first 2 rows.
 
+Questions:
+
+1. Create a reader-friendly table showing the star baker or winner of each episode in Seasons 5 through 10. Comment on this table – were there any predictable overall winners? Any surprises?
+
+```{r}
+ season_winner_df =
+   results_df |>  
+   filter(series >= 5, 
+          result %in% c("Star Baker", "Winner")) |> 
+   group_by(series, episode) |> 
+   summarize(
+    star_baker_or_winner = paste(baker, collapse=", "),  
+    .groups = 'drop'  
+  )
+
+ season_winner_df
+```
 
 
 
+2. Import, clean, tidy, and organize the viewership data in viewers.csv. Show the first 10 rows of this dataset. 
+
+```{r}
+ viewers_df =
+   read_csv("gbb_datasets/viewers.csv", na = c("NA",".","")) |> 
+   janitor::clean_names() |> 
+   pivot_longer(
+     cols = series_1:series_10,
+     names_to = "series",
+     values_to = "viewership"
+   ) |> 
+ mutate(
+    series = case_match(
+      series, 
+       "series_1" ~ 1,
+       "series_2" ~ 2,
+       "series_3" ~ 3,
+       "series_4" ~ 4,
+       "series_5" ~ 5,
+       "series_6" ~ 6,
+       "series_7" ~ 7,
+       "series_8" ~ 8,
+       "series_9" ~ 9,
+       "series_10" ~ 10,
+    ))
+
+ head(viewers_df, 10)
+   
+```
+
+Question: 
+ What was the average viewership in Season 1? In Season 5?
+
+```{r}
+ average_season1 =
+   viewers_df |> 
+   filter(series == 1) |>      
+   summarize(average_season1= mean(viewership, na.rm = TRUE)) 
+
+ average_season1
+ 
+  average_season5 =
+   viewers_df |> 
+   filter(series == 5) |>      
+   summarize(average_season5= mean(viewership, na.rm = TRUE)) 
+  
+  average_season5
+```
+
+The average viewership in Season 1 is 2.77.
+The average viewership in Season 5 is 10.0.
